@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ВетДом — Ветеринар на выезде</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-dark: #0F6E56;
+    --green-mid: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-pale: #9FE1CB;
+    --amber: #EF9F27;
+    --amber-light: #FAEEDA;
+    --text-dark: #1a1a1a;
+    --text-mid: #444;
+    --text-muted: #888;
+    --white: #fff;
+    --bg-soft: #F7FBF9;
+    --radius: 16px;
+    --shadow: 0 4px 32px rgba(15,110,86,0.10);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Nunito', sans-serif; color: var(--text-dark); background: var(--white); overflow-x: hidden; }
+
+  /* ===== NAVIGATION ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(29,158,117,0.12);
+    transition: padding .3s;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); letter-spacing: -0.5px; text-decoration: none; }
+  .logo span { color: var(--amber); }
+
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-links a { color: var(--text-mid); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 50px; transition: background .2s, color .2s; }
+  .nav-links a:hover { color: var(--green-mid); background: var(--green-light); }
+  .nav-cta {
+    background: var(--green-dark) !important; color: var(--white) !important;
+    padding: 10px 22px !important; border-radius: 50px !important; margin-left: 8px !important;
+  }
+  .nav-cta:hover { background: var(--green-mid) !important; }
+
+  /* Hamburger button */
+  .menu-btn {
+    display: none; flex-direction: column; justify-content: center; gap: 5px;
+    width: 40px; height: 40px; background: none; border: none; cursor: pointer;
+    padding: 8px; border-radius: 10px; transition: background .2s;
+  }
+  .menu-btn:hover { background: var(--green-light); }
+  .menu-btn span {
+    display: block; width: 22px; height: 2px; background: var(--green-dark);
+    border-radius: 2px; transition: transform .3s, opacity .3s;
+    transform-origin: center;
+  }
+  .menu-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .menu-btn.open span:nth-child(2) { opacity: 0; }
+  .menu-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile menu — 80% width, blur */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 80%;
+    max-width: 360px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    z-index: 190;
+    flex-direction: column;
+    padding: 90px 32px 40px;
+    box-shadow: -8px 0 48px rgba(15,110,86,0.18);
+    transform: translateX(100%);
+    transition: transform .35s cubic-bezier(.4,0,.2,1);
+    border-left: 1px solid rgba(29,158,117,0.15);
+  }
+  .mobile-menu.open { transform: translateX(0); }
+  .overlay {
+    display: none; position: fixed; inset: 0; background: rgba(10,40,30,0.45);
+    z-index: 185; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    opacity: 0; transition: opacity .3s;
+  }
+  .overlay.active { opacity: 1; }
+
+  .mobile-menu a {
+    display: block; color: var(--text-dark); text-decoration: none;
+    font-weight: 700; font-size: 20px; padding: 16px 0;
+    border-bottom: 1px solid rgba(29,158,117,0.1);
+    transition: color .2s;
+  }
+  .mobile-menu a:hover { color: var(--green-mid); }
+  .mobile-menu .menu-cta-btn {
+    margin-top: 28px; background: var(--green-dark); color: var(--white);
+    text-align: center; padding: 16px; border-radius: 14px; font-size: 17px;
+    border-bottom: none !important;
+  }
+  .mobile-menu .menu-cta-btn:hover { background: var(--green-mid); color: var(--white); }
+  .menu-phone {
+    margin-top: auto; padding-top: 28px; font-size: 13px; color: var(--text-muted);
+    font-weight: 600; text-align: center; border-bottom: none !important;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 120px 40px 80px;
+    background: linear-gradient(135deg, #F7FBF9 0%, #E1F5EE 60%, #fff 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '🐾';
+    position: absolute; right: 5%; top: 18%; font-size: 180px; opacity: 0.07;
+    transform: rotate(-20deg); pointer-events: none;
+  }
+  .hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; width: 100%; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--amber-light); color: #854F0B;
+    border: 1px solid #EF9F2740; border-radius: 50px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700;
+    margin-bottom: 24px; letter-spacing: 0.2px;
+  }
+  .hero-badge::before { content: '⭐'; font-size: 13px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px, 4vw, 58px); font-weight: 900; line-height: 1.12; color: var(--text-dark); margin-bottom: 20px; }
+  h1 em { font-style: normal; color: var(--green-dark); }
+  .hero-sub { font-size: 18px; color: var(--text-mid); line-height: 1.7; margin-bottom: 36px; max-width: 480px; }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+
+  .btn-primary {
+    background: var(--green-dark); color: var(--white); border: none;
+    padding: 16px 36px; border-radius: 50px; font-family: 'Nunito', sans-serif;
+    font-size: 16px; font-weight: 700; cursor: pointer; transition: all .2s;
+    box-shadow: 0 6px 24px rgba(15,110,86,0.28);
+  }
+  .btn-primary:hover { background: var(--green-mid); transform: translateY(-2px); }
+  .btn-secondary {
+    background: transparent; color: var(--green-dark);
+    border: 2px solid var(--green-dark); padding: 14px 28px;
+    border-radius: 50px; font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: all .2s;
+  }
+  .btn-secondary:hover { background: var(--green-light); }
+
+  .hero-card-block {
+    display: flex; justify-content: center; align-items: center; position: relative;
+  }
+  .vet-card {
+    background: var(--white); border-radius: 24px; padding: 28px;
+    box-shadow: 0 8px 48px rgba(15,110,86,0.14);
+    border: 1px solid rgba(29,158,117,0.1);
+    max-width: 340px; width: 100%;
+  }
+  .vet-photo-wrap {
+    width: 100%; height: 180px; border-radius: 16px; overflow: hidden;
+    margin-bottom: 16px; background: var(--green-light);
+  }
+  .vet-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .vet-name { font-weight: 700; font-size: 17px; color: var(--text-dark); }
+  .vet-role { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .vet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--bg-soft); border-radius: 12px; padding: 12px; text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); }
+  .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .online-badge {
+    margin-top: 14px;
+    background: var(--green-light); border-radius: 12px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: var(--green-dark);
+  }
+  .online-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green-mid); animation: pulse 1.8s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+  /* ===== TRUST BAR ===== */
+  .trust-bar {
+    background: var(--green-dark); color: var(--white);
+    padding: 24px 40px; display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+  }
+  .trust-item { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+  .trust-icon { font-size: 20px; }
+
+  /* ===== SECTIONS ===== */
+  section { padding: 90px 40px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-tag { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-mid); margin-bottom: 12px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: clamp(26px, 3vw, 44px); font-weight: 700; color: var(--text-dark); margin-bottom: 16px; line-height: 1.2; }
+  .section-lead { font-size: 17px; color: var(--text-mid); line-height: 1.7; max-width: 560px; margin-bottom: 48px; }
+
+  /* ===== WHY US ===== */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+  .why-card {
+    background: var(--white); border: 1px solid rgba(29,158,117,0.15);
+    border-radius: var(--radius); padding: 28px 24px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .why-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .why-icon { font-size: 36px; margin-bottom: 16px; }
+  .why-title { font-weight: 700; font-size: 16px; color: var(--text-dark); margin-bottom: 8px; }
+  .why-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ===== PHOTO GALLERY ===== */
+  .gallery-section { background: var(--bg-soft); padding: 80px 40px; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 240px 240px;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .gallery-cell { border-radius: 16px; overflow: hidden; position: relative; background: var(--green-light); }
+  .gallery-cell img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+  .gallery-cell:hover img { transform: scale(1.05); }
+  .gallery-cell--tall { grid-column: 1 / 2; grid-row: 1 / 3; }
+  .gallery-cell--wide { grid-column: 2 / 4; }
+  .gallery-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(15,110,86,0.85), transparent);
+    color: white; padding: 20px 16px 14px; font-size: 13px; font-weight: 700;
+    opacity: 0; transition: opacity .3s;
+  }
+  .gallery-cell:hover .gallery-caption { opacity: 1; }
+
+  /* ===== SERVICES ===== */
+  .services-bg { background: var(--white); }
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+  .service-card {
+    background: var(--white); border-radius: var(--radius); overflow: hidden;
+    border: 1px solid rgba(29,158,117,0.12);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .service-card:hover { box-shadow: var(--shadow); transform: translateY(-4px); }
+  .service-top { position: relative; height: 160px; overflow: hidden; }
+  .service-top img { width: 100%; height: 100%; object-fit: cover; }
+  .service-top::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(15,110,86,0.3), rgba(15,110,86,0.7));
+  }
+  .service-title-wrap {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 1;
+    padding: 16px 20px; display: flex; align-items: flex-end; gap: 12px;
+  }
+  .service-icon { font-size: 32px; line-height: 1; }
+  .service-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; color: var(--white); }
+  .service-sub { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; }
+  .service-body { padding: 20px 22px; }
+  .service-body ul { list-style: none; }
+  .service-body li { font-size: 14px; color: var(--text-mid); padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; }
+  .service-body li::before { content: '✓'; color: var(--green-mid); font-weight: 700; }
+  .service-price { padding: 14px 22px; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); border-top: 1px solid var(--green-light); }
+  .service-price span { font-family: 'Nunito', sans-serif; font-size: 13px; color: var(--text-muted); font-weight: 400; }
+
+  /* ===== HOW IT WORKS ===== */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; position: relative; }
+  .step { padding: 32px 24px; text-align: center; position: relative; }
+  .step:not(:last-child)::after {
+    content: '→'; position: absolute; right: -12px; top: 44px;
+    font-size: 24px; color: var(--green-pale);
+  }
+  .step-num {
+    width: 52px; height: 52px; border-radius: 50%; background: var(--green-dark); color: var(--white);
+    font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+  }
+  .step-title { font-weight: 700; font-size: 16px; color: var(--text-dark); margin-bottom: 8px; }
+  .step-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ===== DOCTORS ===== */
+  .doctors-section { background: var(--bg-soft); }
+  .doctors-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+  .doctor-card {
+    background: var(--white); border-radius: var(--radius);
+    overflow: hidden; border: 1px solid rgba(29,158,117,0.12);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .doctor-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .doctor-photo { width: 100%; height: 200px; object-fit: cover; object-position: top; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 72px; }
+  .doctor-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .doctor-info { padding: 20px; }
+  .doctor-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+  .doctor-specialty { font-size: 13px; color: var(--green-mid); font-weight: 700; margin-bottom: 8px; }
+  .doctor-exp { font-size: 13px; color: var(--text-muted); }
+
+  /* ===== ОТЗЫВЫ (Swiper) ===== */
+  .reviews-bg { background: var(--green-dark); color: var(--white); }
+  .reviews-bg h2 { color: var(--white); }
+  .reviews-bg .section-tag { color: var(--green-pale); }
+  .reviews-bg .section-lead { color: rgba(255,255,255,0.75); }
+
+  .reviews-swiper { padding-bottom: 56px !important; }
+  .reviews-swiper .swiper-wrapper { align-items: stretch; }
+  .reviews-swiper .swiper-slide { height: auto; display: flex; }
+  .review-card {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+    border-radius: var(--radius); padding: 28px;
+    flex: 1; display: flex; flex-direction: column;
+  }
+  .review-text { flex: 1; }
+  .review-stars { color: var(--amber); font-size: 16px; margin-bottom: 14px; letter-spacing: 2px; }
+  .review-text { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.9); margin-bottom: 20px; font-style: italic; }
+  .review-author { display: flex; align-items: center; gap: 12px; }
+  .review-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--green-pale); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--green-dark); font-size: 14px; flex-shrink: 0;
+  }
+  .author-name { font-weight: 700; font-size: 14px; color: var(--white); }
+  .author-pet { font-size: 12px; color: var(--green-pale); margin-top: 2px; }
+
+  .swiper-pagination-bullet { background: rgba(255,255,255,0.4) !important; }
+  .swiper-pagination-bullet-active { background: var(--amber) !important; }
+  /* Hide default positioned Swiper arrows — we use custom ones in the header */
+  .swiper-button-next, .swiper-button-prev { display: none !important; }
+
+  /* Reviews header row with custom nav */
+  .reviews-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 40px;
+  }
+  .reviews-header-text { flex: 1; min-width: 0; }
+  .reviews-header-text h2 { margin-bottom: 0; }
+  .reviews-header-text .section-lead { margin-bottom: 0; margin-top: 10px; }
+  .reviews-nav {
+    display: flex; gap: 10px; align-items: center; flex-shrink: 0;
+  }
+  .reviews-nav-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s, transform .15s; font-size: 18px; line-height: 1;
+  }
+  .reviews-nav-btn:hover { background: var(--amber); border-color: var(--amber); transform: scale(1.08); }
+  .reviews-nav-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ===== CTA ===== */
+  .cta-section { background: var(--bg-soft); text-align: center; }
+  .cta-box {
+    background: var(--white); border-radius: 28px; padding: 60px 40px;
+    box-shadow: 0 12px 64px rgba(15,110,86,0.12);
+    border: 1px solid rgba(29,158,117,0.15);
+    max-width: 700px; margin: 0 auto;
+  }
+  .cta-box h2 { margin-bottom: 16px; }
+  .cta-box p { font-size: 17px; color: var(--text-mid); margin-bottom: 36px; }
+  .cta-form { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .cta-input {
+    flex: 1; min-width: 200px; padding: 15px 20px; border-radius: 50px;
+    border: 2px solid rgba(29,158,117,0.2); font-family: 'Nunito', sans-serif;
+    font-size: 15px; outline: none; transition: border-color .2s;
+  }
+  .cta-input:focus { border-color: var(--green-mid); }
+  .guarantee { margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+
+  /* ===== BACK TO TOP ===== */
+  .back-to-top {
+    position: fixed; bottom: 32px; right: 32px; z-index: 150;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--green-dark); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 24px rgba(15,110,86,0.35);
+    opacity: 0; transform: translateY(16px) scale(0.85);
+    transition: opacity .3s, transform .3s, background .2s;
+    pointer-events: none;
+  }
+  .back-to-top.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .back-to-top:hover { background: var(--green-mid); transform: translateY(-3px) scale(1.06); }
+  .back-to-top svg { width: 26px; height: 26px; }
+
+  @media (max-width: 480px) {
+    .back-to-top { bottom: 20px; right: 20px; width: 46px; height: 46px; }
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: #0a3d2e; color: rgba(255,255,255,0.7);
+    padding: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+  }
+  .footer-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--white); font-weight: 700; }
+  .footer-logo span { color: var(--amber); }
+  footer p { font-size: 13px; }
+  .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; margin-left: 20px; font-size: 13px; font-weight: 600; transition: color .2s; }
+  .footer-links a:hover { color: var(--white); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    .gallery-grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 200px 200px 200px;
+    }
+    .gallery-cell--tall { grid-column: 1 / 2; grid-row: 1 / 2; }
+    .gallery-cell--wide { grid-column: 1 / 3; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .menu-btn { display: flex; }
+    .mobile-menu { display: flex; }
+    .overlay { display: block; }
+
+    .hero { padding: 90px 20px 60px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 36px; }
+    .hero-card-block { display: none; }
+
+    section { padding: 60px 20px; }
+    .gallery-section { padding: 60px 20px; }
+    .trust-bar { gap: 20px; padding: 20px; }
+
+    .step:not(:last-child)::after { display: none; }
+    .steps { gap: 8px; }
+
+    .cta-box { padding: 40px 24px; }
+
+    footer { flex-direction: column; text-align: center; padding: 30px 20px; }
+    .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .footer-links a { margin: 0 6px; }
+
+    .gallery-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .gallery-cell { height: 180px; }
+    .gallery-cell--tall, .gallery-cell--wide { grid-column: auto; grid-row: auto; }
+
+    .why-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 30px; }
+    .hero-sub { font-size: 16px; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-secondary { text-align: center; }
+    .why-grid { grid-template-columns: 1fr; }
+    .trust-bar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .cta-form { flex-direction: column; }
+    .cta-input { min-width: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="#" class="logo">Вет<span>Дом</span></a>
+  <div class="nav-links">
+    <a href="#services">Услуги</a>
+    <a href="#how-it-works">Как работаем</a>
+    <a href="#doctors">Врачи</a>
+    <a href="#reviews">Отзывы</a>
+    <a href="#booking" class="nav-cta">Вызвать врача</a>
+  </div>
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"></div>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" class="menu-link">🩺 Услуги</a>
+  <a href="#how-it-works" class="menu-link">📋 Как работаем</a>
+  <a href="#doctors" class="menu-link">👨‍⚕️ Наши врачи</a>
+  <a href="#reviews" class="menu-link">💬 Отзывы</a>
+  <a href="#booking" class="menu-link menu-cta-btn">📞 Вызвать врача</a>
+  <span class="menu-phone">+7 (800) 555-00-00 · Круглосуточно</span>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">Работаем 24/7 · Приедем за 60 минут</div>
+      <h1>Ветеринар<br>приедет к вам<br><em>домой</em></h1>
+      <p class="hero-sub">Профессиональная ветеринарная помощь без стресса для вашего питомца. Опытные врачи, современное оборудование — прямо у вас дома.</p>
+      <div class="hero-actions">
+        <button class="btn-primary">📞 Вызвать врача сейчас</button>
+        <button class="btn-secondary">Узнать цены</button>
+      </div>
+    </div>
+    <div class="hero-card-block">
+      <div class="vet-card">
+        <div class="vet-photo-wrap">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=220&fit=crop&crop=top" alt="Ветеринар Анна Соколова осматривает питомца">
+        </div>
+        <div class="vet-name">Анна Соколова</div>
+        <div class="vet-role">Ветеринар-терапевт · 12 лет опыта</div>
+        <div class="vet-stats">
+          <div class="stat">
+            <div class="stat-num">2 400+</div>
+            <div class="stat-label">пациентов</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">4.97</div>
+            <div class="stat-label">рейтинг</div>
+          </div>
+        </div>
+        <div class="online-badge">
+          <div class="online-dot"></div>
+          Онлайн · Приедет через 45 мин
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item"><span class="trust-icon">🏥</span> 15 ветеринаров в штате</div>
+  <div class="trust-item"><span class="trust-icon">⏱️</span> Приезд за 60 минут</div>
+  <div class="trust-item"><span class="trust-icon">🌙</span> Работаем круглосуточно</div>
+  <div class="trust-item"><span class="trust-icon">📋</span> Официальные ветпаспорта</div>
+  <div class="trust-item"><span class="trust-icon">💳</span> Оплата картой на месте</div>
+</div>
+
+<!-- WHY US -->
+<section>
+  <div class="container">
+    <div class="section-tag">Почему мы</div>
+    <h2>Забота без лишнего стресса</h2>
+    <p class="section-lead">Поход в клинику — это стресс для питомца и хлопоты для вас. Мы приезжаем сами, и животное чувствует себя спокойно в родных стенах.</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">🏠</div>
+        <div class="why-title">Домашняя обстановка</div>
+        <div class="why-desc">Питомец не испытывает стресс от поездки и чужих запахов клиники. Осмотр проходит спокойно.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <div class="why-title">Быстрый выезд</div>
+        <div class="why-desc">Врач прибывает в течение 60 минут после звонка. В экстренных случаях — ещё быстрее.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔬</div>
+        <div class="why-title">Оборудование с собой</div>
+        <div class="why-desc">Анализы крови, УЗИ, капельницы — всё необходимое врач привезёт в специальном чемодане.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📱</div>
+        <div class="why-title">Сопровождение онлайн</div>
+        <div class="why-desc">После визита врач остаётся на связи — ответит на вопросы, скорректирует лечение.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHOTO GALLERY -->
+<section class="gallery-section">
+  <div class="container">
+    <div class="section-tag">Наша работа</div>
+    <h2>Помогаем питомцам каждый день</h2>
+    <div class="gallery-grid">
+      <div class="gallery-cell gallery-cell--tall">
+        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&h=500&fit=crop" alt="Ветеринар осматривает кошку дома">
+        <div class="gallery-caption">Осмотр на дому</div>
+      </div>
+      <div class="gallery-cell gallery-cell--wide">
+        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=250&fit=crop" alt="Врач с собакой во время визита">
+        <div class="gallery-caption">Плановый визит к собаке</div>
+      </div>
+      <div class="gallery-cell">
+        <img src="https://images.unsplash.com/photo-1548767797-d8c844163c4a?w=400&h=250&fit=crop" alt="Вакцинация кошки">
+        <div class="gallery-caption">Вакцинация</div>
+      </div>
+      <div class="gallery-cell">
+        <img src="https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=400&h=250&fit=crop" alt="Врач с оборудованием">
+        <div class="gallery-caption">Диагностика</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-bg" id="services">
+  <div class="container">
+    <div class="section-tag">Услуги</div>
+    <h2>Что мы делаем на выезде</h2>
+    <p class="section-lead">Полный спектр ветеринарной помощи — от профилактики до экстренных случаев.</p>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-top">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&h=200&fit=crop" alt="Терапевтический осмотр">
+          <div class="service-title-wrap">
+            <div class="service-icon">🩺</div>
+            <div>
+              <div class="service-title">Терапевтический осмотр</div>
+              <div class="service-sub">Плановый и экстренный</div>
+            </div>
+          </div>
+        </div>
+        <div class="service-body">
+          <ul>
+            <li>Первичный и повторный осмотр</li>
+            <li>Анализы крови и мочи</li>
+            <li>Назначение лечения</li>
+            <li>Контроль хронических заболеваний</li>
+          </ul>
+        </div>
+        <div class="service-price">от 1 500 ₽ <span>/ выезд</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-top">
+          <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=600&h=200&fit=crop" alt="Вакцинация животных">
+          <div class="service-title-wrap">
+            <div class="service-icon">💉</div>
+            <div>
+              <div class="service-title">Вакцинация и чипирование</div>
+              <div class="service-sub">Официальные документы</div>
+            </div>
+          </div>
+        </div>
+        <div class="service-body">
+          <ul>
+            <li>Все виды прививок для кошек и собак</li>
+            <li>Выдача ветеринарного паспорта</li>
+            <li>Чипирование с регистрацией</li>
+            <li>Обработка от паразитов</li>
+          </ul>
+        </div>
+        <div class="service-price">от 2 000 ₽ <span>/ выезд</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-top">
+          <img src="https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&h=200&fit=crop" alt="Экстренная ветеринарная помощь">
+          <div class="service-title-wrap">
+            <div class="service-icon">🚨</div>
+            <div>
+              <div class="service-title">Экстренная помощь</div>
+              <div class="service-sub">24/7 без выходных</div>
+            </div>
+          </div>
+        </div>
+        <div class="service-body">
+          <ul>
+            <li>Капельницы и инъекции на дому</li>
+            <li>Купирование острых состояний</li>
+            <li>Послеоперационный уход</li>
+            <li>Консультация по телефону</li>
+          </ul>
+        </div>
+        <div class="service-price">от 2 500 ₽ <span>/ выезд</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-tag">Как это работает</div>
+    <h2>4 шага до помощи питомцу</h2>
+    <p class="section-lead">Вызвать врача на дом так же просто, как заказать доставку.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Позвоните нам</div>
+        <div class="step-desc">Или оставьте заявку на сайте. Ответим в течение 2 минут.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Опишите симптомы</div>
+        <div class="step-desc">Менеджер уточнит детали и подберёт нужного специалиста.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Врач приедет</div>
+        <div class="step-desc">В течение 60 минут врач будет у вас с полным оснащением.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Питомец здоров</div>
+        <div class="step-desc">Получите лечение, документы и дальнейшее сопровождение.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCTORS -->
+<section class="doctors-section" id="doctors">
+  <div class="container">
+    <div class="section-tag">Команда</div>
+    <h2>Наши ветеринары</h2>
+    <p class="section-lead">Каждый врач имеет официальную квалификацию и любит животных — это главный критерий отбора.</p>
+    <div class="doctors-grid">
+      <div class="doctor-card">
+        <div class="doctor-photo">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=220&fit=crop&crop=top" alt="Ветеринар Анна Соколова">
+        </div>
+        <div class="doctor-info">
+          <div class="doctor-name">Анна Соколова</div>
+          <div class="doctor-specialty">Терапевт · Кардиолог</div>
+          <div class="doctor-exp">12 лет опыта · 2 400+ пациентов</div>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-photo">
+          <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&h=220&fit=crop&crop=top" alt="Ветеринар Дмитрий Волков">
+        </div>
+        <div class="doctor-info">
+          <div class="doctor-name">Дмитрий Волков</div>
+          <div class="doctor-specialty">Хирург · Травматолог</div>
+          <div class="doctor-exp">9 лет опыта · 1 800+ пациентов</div>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-photo">
+          <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=220&fit=crop&crop=top" alt="Ветеринар Елена Краснова">
+        </div>
+        <div class="doctor-info">
+          <div class="doctor-name">Елена Краснова</div>
+          <div class="doctor-specialty">Дерматолог · Аллерголог</div>
+          <div class="doctor-exp">7 лет опыта · 1 200+ пациентов</div>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-photo">
+          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=220&fit=crop&crop=top" alt="Ветеринар Михаил Орлов">
+        </div>
+        <div class="doctor-info">
+          <div class="doctor-name">Михаил Орлов</div>
+          <div class="doctor-specialty">Невролог · Терапевт</div>
+          <div class="doctor-exp">15 лет опыта · 3 100+ пациентов</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS (Swiper) -->
+<section class="reviews-bg" id="reviews">
+  <div class="container">
+    <div class="reviews-header">
+      <div class="reviews-header-text">
+        <div class="section-tag">Отзывы</div>
+        <h2>Нам доверяют 1 200+ семей</h2>
+        <p class="section-lead">Реальные истории от владельцев кошек, собак, кроликов и не только.</p>
+      </div>
+      <div class="reviews-nav">
+        <button class="reviews-nav-btn" id="reviewsPrev" aria-label="Previous">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="reviews-nav-btn" id="reviewsNext" aria-label="Next">
+          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="swiper reviews-swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">«Кот съел что-то не то ночью. Врач приехал за 40 минут, сделал всё нужное прямо дома. Никакого стресса ни для нас, ни для Пуха!»</div>
+            <div class="review-author">
+              <div class="review-avatar">МК</div>
+              <div>
+                <div class="author-name">Мария К.</div>
+                <div class="author-pet">🐱 Кот Пух, 4 года</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-slide">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">«Делаем прививки прямо дома уже три года. Собака не боится, документы все официальные. Рекомендую всем соседям!»</div>
+            <div class="review-author">
+              <div class="review-avatar">АС</div>
+              <div>
+                <div class="author-name">Алексей С.</div>
+                <div class="author-pet">🐶 Бигль Рекс, 6 лет</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-slide">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">«Пожилой кролик требует частых осмотров. ВетДом — спасение! Врач всегда внимательный, терпеливый. Чувствуется настоящая любовь к животным.»</div>
+            <div class="review-author">
+              <div class="review-avatar">ОВ</div>
+              <div>
+                <div class="author-name">Ольга В.</div>
+                <div class="author-pet">🐰 Кролик Снежок, 8 лет</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-slide">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">«Вызвала врача к попугаю — удивилась, что он разбирается в экзотических птицах! Лечение помогло, теперь Кеша в порядке. Очень благодарна!»</div>
+            <div class="review-author">
+              <div class="review-avatar">НП</div>
+              <div>
+                <div class="author-name">Наталья П.</div>
+                <div class="author-pet">🦜 Попугай Кеша, 3 года</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-slide">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">«Кошка была тяжело больна, везти в клинику было нельзя. ВетДом приехал за 35 минут, поставили капельницу. Спасибо, что спасли нашу Мусю!»</div>
+            <div class="review-author">
+              <div class="review-avatar">ИМ</div>
+              <div>
+                <div class="author-name">Игорь М.</div>
+                <div class="author-pet">🐱 Кошка Муся, 11 лет</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-slide">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">«Послеоперационный уход проходил дома с поддержкой врача. Удобно, что не нужно каждый день ездить в клинику — врач приезжал сам.»</div>
+            <div class="review-author">
+              <div class="review-avatar">ТЛ</div>
+              <div>
+                <div class="author-name">Татьяна Л.</div>
+                <div class="author-pet">🐶 Такса Барни, 5 лет</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="booking">
+  <div class="container">
+    <div class="cta-box">
+      <div class="section-tag" style="text-align:center;">Запись на выезд</div>
+      <h2>Ваш питомец<br>заслуживает лучшего</h2>
+      <p>Оставьте номер телефона — мы перезвоним в течение 2 минут и согласуем удобное время приезда врача.</p>
+      <div class="cta-form">
+        <input type="tel" class="cta-input" placeholder="+7 (___) ___-__-__">
+        <button class="btn-primary">Вызвать врача 🐾</button>
+      </div>
+      <p class="guarantee">🔒 Без спама · Первичная консультация бесплатно · Работаем официально</p>
+    </div>
+  </div>
+</section>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" aria-label="Наверх">
+  <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Paw icon -->
+    <circle cx="26" cy="32" r="10" fill="white" opacity="0.95"/>
+    <ellipse cx="17" cy="22" rx="4.5" ry="5.5" fill="white" opacity="0.95"/>
+    <ellipse cx="35" cy="22" rx="4.5" ry="5.5" fill="white" opacity="0.95"/>
+    <ellipse cx="11" cy="29" rx="3.5" ry="4.5" fill="white" opacity="0.95"/>
+    <ellipse cx="41" cy="29" rx="3.5" ry="4.5" fill="white" opacity="0.95"/>
+    <!-- Up arrow overlay -->
+    <polyline points="21,34 26,28 31,34" stroke="#0F6E56" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-logo">Вет<span>Дом</span></div>
+  <p>© 2025 ВетДом · Ветеринарный сервис на выезде</p>
+  <div class="footer-links">
+    <a href="#">Политика конфиденциальности</a>
+    <a href="#">Контакты</a>
+    <a href="#">+7 (800) 555-00-00</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  // Swiper reviews
+  const swiper = new Swiper('.reviews-swiper', {
+    slidesPerView: 1,
+    spaceBetween: 24,
+    loop: true,
+    autoplay: { delay: 4500, disableOnInteraction: false },
+    pagination: { el: '.swiper-pagination', clickable: true },
+    breakpoints: {
+      600: { slidesPerView: 2 },
+      960: { slidesPerView: 3 }
+    }
+  });
+
+  // Custom nav buttons
+  document.getElementById('reviewsPrev').addEventListener('click', () => swiper.slidePrev());
+  document.getElementById('reviewsNext').addEventListener('click', () => swiper.slideNext());
+
+  // Mobile menu
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const overlay = document.getElementById('overlay');
+
+  function toggleMenu() {
+    menuBtn.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  }
+
+  menuBtn.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (mobileMenu.classList.contains('open')) toggleMenu();
+    });
+  });
+
+  // Back to top
+  const backToTop = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('visible', window.scrollY > 400);
+  });
+  backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
